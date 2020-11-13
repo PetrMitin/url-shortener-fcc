@@ -56,7 +56,7 @@ app.post('/api/shorturl/new', async (req, res) => {
     }, (err, data) => {
       if (err) return console.log(err);
       res.json({
-        full_url: url_to_shorten,
+        original_url: url_to_shorten,
         short_url: data._id
       })
     })
