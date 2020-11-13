@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const dns = require('dns');
+const urlModule = require('url');
 const app = express();
 
 // Basic Configuration
@@ -41,15 +43,22 @@ const getPrevId = async () => {
 // mounting route /api/shorturl/...
 app.post('/api/shorturl/new', async (req, res) => {
   const url_to_shorten = req.body.url;
-  const prevId = await getPrevId();
-  Url.create({
-    'full_url': url_to_shorten,
-    '_id': prevId + 1
-  }, (err, data) => {
+  const parsedLookupUrl = urlModule.parse(url_to_shorten);
+  dns.lookup(parsedLookupUrl.hostname, async (err, address, family) => {
     if (err) return console.log(err);
-    res.json({
-      full_url: url_to_shorten,
-      short_url: data._id
+    if (address === null) {
+      return res.json({"error": "invalid url"});
+    }
+    const prevId = await getPrevId();
+    Url.create({
+      'full_url': url_to_shorten,
+      '_id': prevId + 1
+    }, (err, data) => {
+      if (err) return console.log(err);
+      res.json({
+        full_url: url_to_shorten,
+        short_url: data._id
+      })
     })
   })
 })
