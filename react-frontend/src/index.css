@@ -1,0 +1,38 @@
+@import "~materialize-css/dist/css/materialize.min.css";
+#url_input {
+  width: 30%;
+  color: rgba(64, 196, 255, .7);
+  border-bottom: .5px solid #40c4ff;
+  box-shadow: 0 1px 0 0 #40c4ff; 
+}
+
+#url_input:focus {
+  border-bottom: 1px solid #40c4ff;
+  box-shadow: 0 0 3px 3px #40c4ff;
+}
+
+#submit-url {
+  transition-duration: .4s;
+  transition-property: box-shadow;
+  border: 1px solid #40c4ff;
+  box-shadow: 2px 2px 2px 2px #40c4ff;
+}
+
+#submit-url:hover {
+  border: 1px solid #40c4ff;
+  box-shadow: 2px 2px 7px 3px #40c4ff;
+}
+
+.url-info {
+  margin: auto;
+  max-width: 70%;
+  border-bottom: 2px solid #40c4ff;
+  box-shadow: 0 0 5px 5px #40c4ff;
+  border-radius: 10px;
+  color: rgba(0, 0, 0, .5);
+}
+
+h1 {
+  color:#f06292;
+  text-shadow: 1px 5px 5px #f06292; 
+}

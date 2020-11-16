@@ -1,24 +1,25 @@
-require('dotenv').config();
+require('dotenv').config({path: process.cwd() + '/sample.env'});
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const dns = require('dns');
-const urlModule = require('url');
+const path = require('path');
 const app = express();
 
 // Basic Configuration
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 app.use(cors());
 
 // body-parser is enbuilt in express
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({extended: true}));
+app.use(express.json())
 
-app.use('/public', express.static(`${process.cwd()}/public`));
-
-app.get('/', function(req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
-});
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.resolve(__dirname, 'react-frontend', 'build')))
+  app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'react-frontend', 'build', 'index.html'))
+  })
+}
 
 //Mongoose setup and functions
 const urlSchema = new mongoose.Schema({
@@ -28,7 +29,7 @@ const urlSchema = new mongoose.Schema({
 
 const Url = mongoose.model('Url', urlSchema);
 
-mongoose.connect('mongodb+srv://petr:150600Pm@url-db.c0vis.mongodb.net/<dbname>?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology: true})
 
 const getPrevId = async () => {
   //.exec() returns either nothing or Promise fullfilling to the requested data. 
@@ -40,48 +41,47 @@ const getPrevId = async () => {
   return data[0]._id
 }
 
-// mounting route /api/shorturl/...
-app.post('/api/shorturl/new', async (req, res) => {
+// mounting route /
+app.post('/new', async (req, res) => {
   const url_to_shorten = req.body.url;
-  const parsedLookupUrl = urlModule.parse(url_to_shorten);
-  dns.lookup(parsedLookupUrl.hostname, async (err, address, family) => {
-    if (err) return console.log(err);
-    if (address === null) {
-      return res.json({"error": "invalid url"});
-    }
-    const prevId = await getPrevId();
-    Url.create({
-      'full_url': url_to_shorten,
-      '_id': prevId + 1
-    }, (err, data) => {
-      if (err) return console.log(err);
-      res.json({
-        full_url: url_to_shorten,
-        short_url: data._id
-      })
+  if (!require('valid-url').isUri(url_to_shorten)) {
+    return res.json({"error": "invalid url"});
+  }
+  const prevId = await getPrevId();
+  Url.create({
+    'full_url': url_to_shorten,
+    '_id': prevId + 1
+  }, (err, data) => {
+    if (err) return res.sendStatus(500);
+    const shortUrl = req.protocol + '://' + req.get('host') + '/' + data._id;
+    res.json({
+      full_url: url_to_shorten,
+      short_url: shortUrl
     })
-  })
-})
-
-app.get('/api/shorturl/all', (req, res) => {
-  Url.find({}, (err, data) => {
-    if (err) return console.log(err);
-    res.json({"urls": data});
   })
 })
 
 app.param('url', async (req, res, next, id) => {
   const full_url = await Url.findOne({'_id': id}, (err, data) => {
     if (err) return console.log(err);
+    if (!data) return null;
     return data.full_url;
   });
-  req.body.full_url = full_url.full_url;
+  if (full_url === null) {
+    req.body.full_url = null;
+  } 
+  else {
+    req.body.full_url = full_url.full_url;
+  }
   next();
 })
 
-app.get('/api/shorturl/:url', (req, res) => {
+app.get('/:url', (req, res) => {
   const url = req.body.full_url;
-  res.redirect(url)
+  if (url) {
+    return res.redirect(url);
+  }
+  res.redirect(process.env.MAIN_URL);
 })
 
 app.listen(port, function() {

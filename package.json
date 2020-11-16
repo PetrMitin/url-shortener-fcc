@@ -4,8 +4,12 @@
   "description": "API project for freeCodeCamp",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "cross-env NODE_ENV=production node server.js",
+    "back-start-dev": "nodemon server.js",
+    "front-start": "npm run start --prefix react-frontend",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run back-start-dev\" \"npm run front-start\"",
+    "front:install": "npm install --prefix react-frontend",
+    "front:build": "cross-env NODE_ENV=production npm run build --prefix react-frontend"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -13,13 +17,16 @@
     "express": "^4.17.1",
     "mongoose": "^5.10.13",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "valid-url": "^1.0.9"
   },
   "engines": {
     "node": "12.18.3"
   },
   "license": "MIT",
   "devDependencies": {
+    "concurrently": "^5.3.0",
+    "cross-env": "^7.0.2",
     "nodemon": "^2.0.4"
   }
 }
