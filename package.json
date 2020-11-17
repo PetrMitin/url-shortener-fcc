@@ -22,7 +22,8 @@
     "cross-env": "^7.0.2"
   },
   "engines": {
-    "node": "12.18.3"
+    "node": "10.16.2",
+    "npm": "6.9.0"
   },
   "license": "MIT",
   "devDependencies": {
