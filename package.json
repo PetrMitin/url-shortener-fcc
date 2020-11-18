@@ -7,9 +7,7 @@
     "start": "cross-env NODE_ENV=production node server.js",
     "back-start-dev": "nodemon server.js",
     "front-start": "npm run start --prefix react-frontend",
-    "dev": "cross-env NODE_ENV=development concurrently \"npm run back-start-dev\" \"npm run front-start\"",
-    "front:install": "npm install --prefix react-frontend",
-    "front:build": "cross-env NODE_ENV=production npm run build --prefix react-frontend"
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run back-start-dev\" \"npm run front-start\""
   },
   "dependencies": {
     "cors": "^2.8.5",
